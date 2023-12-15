@@ -2,31 +2,41 @@
 const int ledPin = 14;  // 16 corresponds to GPIO16
 const int ledDir = 12;
 const int ledEn = 13;
+const int switchPin = 15;
 
 // setting PWM properties
-const int freq = 200;
+const int freq = 4000; // foot 200, thigh 2000
 const int ledChannel = 0;
 const int resolution = 8;
 
-long delay_time = 2000;
- 
+long delay_time = 15000;
+
 void setup(){
+  Serial.begin(115200);
   // configure LED PWM functionalitites
   pinMode(ledEn, OUTPUT);
   pinMode(ledDir, OUTPUT);
+  pinMode(switchPin, INPUT_PULLUP);
   digitalWrite(ledEn, LOW);
 
   ledcSetup(ledChannel, freq, resolution);
   
   // attach the channel to the GPIO to be controlled
   ledcAttachPin(ledPin, ledChannel);
+
+  while (digitalRead(switchPin) == HIGH)
+  {
+    digitalWrite(ledDir, LOW);
+    ledcWrite(ledChannel, 200);
+    delay(5);
+  }
+  ledcWrite(ledChannel, 0);
 }
  
 void loop(){
-  // increase the LED brightness
-  
+
   digitalWrite(ledDir, HIGH);
-  int dutyCycle = 5;
+  int dutyCycle = 25;
   ledcWrite(ledChannel, dutyCycle);
   
   delay(delay_time);
@@ -34,16 +44,4 @@ void loop(){
   ledcWrite(ledChannel, dutyCycle);
 
   delay(delay_time);
-  // for(int dutyCycle = 0; dutyCycle <= 255; dutyCycle++){   
-  //   // changing the LED brightness with PWM
-  //   ledcWrite(ledChannel, dutyCycle);
-  //   delay(15);
-  // }
-
-  // // decrease the LED brightness
-  // for(int dutyCycle = 255; dutyCycle >= 0; dutyCycle--){
-  //   // changing the LED brightness with PWM
-  //   ledcWrite(ledChannel, dutyCycle);   
-  //   delay(15);
-  // }
 }
