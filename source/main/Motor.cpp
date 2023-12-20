@@ -1,16 +1,18 @@
 #include "Motor.h"
 
-Motor::Motor(uint8_t *pwm, uint8_t *dir, uint8_t *stop, uint8_t *channel, bool *isLong)
+Motor::Motor()
 {
-  &pwmPin = pwm;
-  &dirPin = dir;
-  &stopPin = stop;
-  &pwmChannel = channel;
-  &isLongFred = isLong;
+
 }
 
-void Motor::motorInit()
+void Motor::motorInit(uint8_t pwm, uint8_t dir, uint8_t stop, uint8_t channel, bool isLong)
 {
+  pwmPin = pwm;
+  dirPin = dir;
+  stopPin = stop;
+  pwmChannel = channel;
+  isLongFred = isLong;
+
   pinMode(dirPin, OUTPUT);
   pinMode(stopPin, INPUT_PULLUP);
 
@@ -20,11 +22,11 @@ void Motor::motorInit()
     ledcSetup(pwmChannel, SHORT_FRED, RESOLUTION);
 
   ledcAttachPin(pwmPin, pwmChannel);
-  digitalWrite(dirPin, LOW);
 }
 
 void Motor::setSpeedMotor(int value)
 {
+  Serial.printf("Value of %d: %d\n", pwmChannel, value);
   ledcWrite(pwmChannel, value);
 }
 
