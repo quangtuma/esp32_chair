@@ -36,6 +36,9 @@ uint8_t dc_motor_channel2[DC_MOTOR_NUM] = { 3, 5, 7 };
 DCMotor dcMotorList[DC_MOTOR_NUM];
 uint8_t duty_dc = 200;
 
+int Auto_Number = 1;
+bool Auto_Restart = true; 
+
 enum EnumMode{
   Auto = 0,
   Manual,
@@ -85,22 +88,22 @@ void setupMotors(){
   }
 
   // to stop point
-  // while(stepMotorList[0].getStopMotor() == HIGH
-  //       || stepMotorList[1].getStopMotor() == HIGH
-  //       || dcMotorList[0].getStopMotor() == HIGH
-  //       || dcMotorList[1].getStopMotor() == HIGH
-  // )
-  // {
-  //   Serial.printf("In while!\n");
-  //   if (stepMotorList[0].getStopMotor() == LOW)
-  //     stepMotorList[0].setSpeedMotor(0);
-  //   if (stepMotorList[1].getStopMotor() == LOW)
-  //     stepMotorList[1].setSpeedMotor(0);
-  //   if (dcMotorList[0].getStopMotor() == LOW)
-  //     dcMotorList[0].setStopMotor();
-  //   if (dcMotorList[1].getStopMotor() == LOW)
-  //     dcMotorList[1].setStopMotor();
-  // }
+  while(stepMotorList[0].getStopMotor() == HIGH
+        || stepMotorList[1].getStopMotor() == HIGH
+        || dcMotorList[0].getStopMotor() == HIGH
+        || dcMotorList[1].getStopMotor() == HIGH
+  )
+  {
+    Serial.printf("In while!\n");
+    if (stepMotorList[0].getStopMotor() == LOW)
+      stepMotorList[0].setSpeedMotor(0);
+    if (stepMotorList[1].getStopMotor() == LOW)
+      stepMotorList[1].setSpeedMotor(0);
+    if (dcMotorList[0].getStopMotor() == LOW)
+      dcMotorList[0].setStopMotor();
+    if (dcMotorList[1].getStopMotor() == LOW)
+      dcMotorList[1].setStopMotor();
+  }
   Serial.printf("Turn root!\n");
   delay(1000);
   
@@ -201,7 +204,7 @@ void callback(char *topic, byte *payload, unsigned int length) {
   Serial.print("Message arrived in topic: ");
   Serial.println(topic);
   String message;
-  Serial.print("Message:");
+  Serial.print("Message: ");
   for (int i = 0; i < length; i++) {
     message += (char)payload[i];
     Serial.print((char) payload[i]);
@@ -210,13 +213,12 @@ void callback(char *topic, byte *payload, unsigned int length) {
 
   String topicStr = String(topic);
 
-  if (topicStr == topic_mode)
-  //  setMode(message);
-  {
+  if (topicStr == topic_mode){
     if(message == "0")
     {
       Serial.println("Set Mode: Auto");
       MODE = Auto;
+      Auto_Restart = true;
     }
     else if (message == "1")
     {
@@ -229,65 +231,71 @@ void callback(char *topic, byte *payload, unsigned int length) {
       MODE = Gesture;
     }
   }
-  else if(topicStr.startsWith(topic_control_gen))
-  {
-    //if (MODE == Manual)
-    //setControl(topic, message);
-    if (topicStr == topic_control[0]){
-      if(message == "0")
-        stepMotorList[0].setSpeedMotor(0);
-      else if(message == "1")
-      {
-        Serial.println("Chan trai len");
-        stepMotorList[0].setDirection(UP);
-        stepMotorList[0].setSpeedMotor(duty_step);
+  else if(topicStr.startsWith(topic_control_gen)){
+    if (MODE == Manual)
+      if (topicStr == topic_control[0]){
+        if(message == "0")
+          stepMotorList[0].setSpeedMotor(0);
+        else if(message == "1")
+        {
+          Serial.println("Chan trai len");
+          stepMotorList[0].setDirection(UP);
+          stepMotorList[0].setSpeedMotor(duty_step);
+        }
+        else if(message == "2")
+        {
+          Serial.println("Chan trai xuong");
+          stepMotorList[0].setDirection(DOWN);
+          stepMotorList[0].setSpeedMotor(duty_step);
+        }
       }
-      else if(message == "2")
-      {
-        Serial.println("Chan trai xuong");
-        stepMotorList[0].setDirection(DOWN);
-        stepMotorList[0].setSpeedMotor(duty_step);
+      else if (topicStr == topic_control[1]){
+        if(message == "0")
+          dcMotorList[0].setStopMotor();
+        else if(message == "1")
+          dcMotorList[0].setSpeedUp(duty_dc);
+        else if(message == "2")
+          dcMotorList[0].setSpeedDown(duty_dc);
       }
-    }
-    else if (topicStr == topic_control[1]){
-      if(message == "0")
-        dcMotorList[0].setStopMotor();
-      else if(message == "1")
-        dcMotorList[0].setSpeedUp(duty_dc);
-      else if(message == "2")
-        dcMotorList[0].setSpeedDown(duty_dc);
-    }
-    else if (topicStr == topic_control[2]){
-      if(message == "0")
-        dcMotorList[2].setStopMotor();
-      else if(message == "1")
-        dcMotorList[2].setSpeedUp(duty_dc);
-      else if(message == "2")
-        dcMotorList[2].setSpeedDown(duty_dc);
-    }
-    else if (topicStr == topic_control[3]){
-      if(message == "0")
-        stepMotorList[1].setSpeedMotor(0);
-      else if(message == "1")
-      {
-        Serial.println("Chan phai len");
-        stepMotorList[1].setDirection(UP);
-        stepMotorList[1].setSpeedMotor(duty_step);
+      else if (topicStr == topic_control[2]){
+        if(message == "0")
+          dcMotorList[2].setStopMotor();
+        else if(message == "1")
+          dcMotorList[2].setSpeedUp(duty_dc);
+        else if(message == "2")
+          dcMotorList[2].setSpeedDown(duty_dc);
       }
-      else if(message == "2")
-      {
-        Serial.println("Chan phai xuong");
-        stepMotorList[1].setDirection(DOWN);
-        stepMotorList[1].setSpeedMotor(duty_step);
+      else if (topicStr == topic_control[3]){
+        if(message == "0")
+          stepMotorList[1].setSpeedMotor(0);
+        else if(message == "1")
+        {
+          Serial.println("Chan phai len");
+          stepMotorList[1].setDirection(UP);
+          stepMotorList[1].setSpeedMotor(duty_step);
+        }
+        else if(message == "2")
+        {
+          Serial.println("Chan phai xuong");
+          stepMotorList[1].setDirection(DOWN);
+          stepMotorList[1].setSpeedMotor(duty_step);
+        }
       }
+      else if (topicStr == topic_control[4]){
+        if(message == "0")
+          dcMotorList[1].setStopMotor();
+        else if(message == "1")
+          dcMotorList[1].setSpeedUp(duty_dc);
+        else if(message == "2")
+          dcMotorList[1].setSpeedDown(duty_dc);
+      }
+  }
+  else if(topicStr.startsWith("Auto")){
+    if(topicStr.endsWith("Number")){
+      Auto_Number = message.toInt();
     }
-    else if (topicStr == topic_control[4]){
-      if(message == "0")
-        dcMotorList[1].setStopMotor();
-      else if(message == "1")
-        dcMotorList[1].setSpeedUp(duty_dc);
-      else if(message == "2")
-        dcMotorList[1].setSpeedDown(duty_dc);
+    else if(topicStr.endsWith("Restart")){
+      Auto_Restart = true;
     }
   }
 }
@@ -314,6 +322,8 @@ void reconnect(){
   client.subscribe("Initial");
   client.subscribe(topic_mode);
   client.subscribe(topic_data);
+  client.subscribe("Auto/Number");
+  client.subscribe("Auto/Restart");
   for(uint8_t index = 0; index < MOTOR_NUM; index++){
     client.subscribe(topic_control[index]);
   }
@@ -321,6 +331,14 @@ void reconnect(){
 
 void runManual(){
   //Serial.println("Run manual!");
+  if (stepMotorList[0].getStopMotor() == LOW)
+    stepMotorList[0].setSpeedMotor(0);
+  if (stepMotorList[1].getStopMotor() == LOW)
+    stepMotorList[1].setSpeedMotor(0);
+  if (dcMotorList[0].getStopMotor() == LOW)
+    dcMotorList[0].setStopMotor();
+  if (dcMotorList[1].getStopMotor() == LOW)
+    dcMotorList[1].setStopMotor();
 }
 
 void runGesture(){
@@ -348,18 +366,26 @@ void loop(){
   }
   client.loop();
 
-  // switch(MODE)
-  // {
-  //   case Auto:
-  //     runAuto();
-  //     break;
-  //   case Manual:
-  //     runManual();
-  //     break;
-  //   case Gesture:
-  //     runGesture();
-  //     break;
-  //   default:
-  //     break;
-  // }
+  switch(MODE)
+  {
+    case Auto:
+      if(Auto_Restart){
+        client.publish("Auto/IsRun", "1");
+        for(uint8_t index = 0; index < Auto_Number; index++){
+          runAuto();
+          Serial.println("OUT AUTO!");
+        }
+        Auto_Restart = false;
+        client.publish("Auto/IsRun", "0");
+      }
+      break;
+    case Manual:
+      runManual();
+      break;
+    case Gesture:
+      runGesture();
+      break;
+    default:
+      break;
+  }
 }
