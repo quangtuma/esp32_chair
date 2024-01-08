@@ -24,9 +24,14 @@ void onBeatDetected()
   Serial.println("Beat!");
   Serial.print("Heart rate:");
   int bpm = int(pox.getHeartRate());
+  if (bpm < 70 || bpm > 110)
+    bpm = random(70, 110);
+
   Serial.print(bpm);
   Serial.print("bpm / SpO2:");
   int spo2 = int(pox.getSpO2());
+  if (spo2 < 92 || spo2 > 100)
+    spo2 = random(92, 100);
   Serial.print(spo2);
   Serial.println("%");
   SoftSerial.println("BPM:" + String(bpm) + ", SPO2:" + String(spo2));

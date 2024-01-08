@@ -41,8 +41,8 @@ uint8_t duty_step = 250;
 
 #define DC_MOTOR_NUM 3
 long delay_time_dc = 3000;
-uint8_t dc_motor_pwm1_pin[DC_MOTOR_NUM] = { 23, 16, 18 };
-uint8_t dc_motor_pwm2_pin[DC_MOTOR_NUM] = { 4, 17, 19 };
+uint8_t dc_motor_pwm1_pin[DC_MOTOR_NUM] = { 4, 16, 18 };
+uint8_t dc_motor_pwm2_pin[DC_MOTOR_NUM] = { 23, 17, 19 };
 uint8_t dc_motor_stop_pin[DC_MOTOR_NUM] = { 34, 39, 36 };
 uint8_t dc_motor_channel1[DC_MOTOR_NUM] = { 2, 4, 6 };
 uint8_t dc_motor_channel2[DC_MOTOR_NUM] = { 3, 5, 7 };
